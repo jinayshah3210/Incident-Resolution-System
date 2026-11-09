@@ -1,21 +1,67 @@
 import { http, HttpResponse } from 'msw'
 
-// Mock "database". The real backend will store BCrypt hashes, never plain passwords.
 let users = [
-  { id: 1, name: 'Asha Employee',   email: 'emp@test.com',   password: 'Emp@1234',   role: 'EMPLOYEE' },
-  { id: 2, name: 'Ravi Technician', email: 'tech@test.com',  password: 'Tech@1234',  role: 'TECHNICIAN' },
-  { id: 3, name: 'Meera Admin',     email: 'admin@test.com', password: 'Admin@1234', role: 'ADMIN' },
+  { id: 1, name: 'Asha Employee', email: 'emp@test.com', password: 'Emp@1234', role: 'EMPLOYEE' },
+  { id: 2, name: 'Ravi Technician', email: 'tech@test.com', password: 'Tech@1234', role: 'TECHNICIAN' },
+  { id: 3, name: 'Meera Admin', email: 'admin@test.com', password: 'Admin@1234', role: 'ADMIN' },
 ]
 
 let incidents = [
-  { id: 'INC1001', title: 'Payment app unavailable', category: 'APPLICATION',
-    service: 'Payment', priority: 'P1', status: 'ASSIGNED',
-    reporter: 'Asha Employee', technician: 'Ravi Technician',
-    createdAt: '2026-11-07T10:05:00Z' },
-  { id: 'INC1002', title: 'VPN keeps disconnecting', category: 'NETWORK',
-    service: 'Network', priority: 'P3', status: 'IN_PROGRESS',
-    reporter: 'Asha Employee', technician: 'Ravi Technician',
-    createdAt: '2026-11-07T11:20:00Z' },
+  {
+    id: 'INC1001',
+    title: 'Payment app unavailable',
+    category: 'APPLICATION',
+    service: 'Payment',
+    priority: 'P1',
+    status: 'ASSIGNED',
+    reporter: 'Asha Employee',
+    technician: 'Ravi Technician',
+    createdAt: '2026-11-07T10:05:00Z',
+  },
+  {
+    id: 'INC1002',
+    title: 'VPN keeps disconnecting',
+    category: 'NETWORK',
+    service: 'Network',
+    priority: 'P3',
+    status: 'IN_PROGRESS',
+    reporter: 'Asha Employee',
+    technician: 'Ravi Technician',
+    createdAt: '2026-11-07T11:20:00Z',
+  },
+  {
+    id: 'INC1003',
+    title: 'Laptop unable to connect to Wi-Fi',
+    category: 'ENDPOINT',
+    service: 'Endpoint Support',
+    priority: 'P2',
+    status: 'ACKNOWLEDGED',
+    reporter: 'Asha Employee',
+    technician: 'Ravi Technician',
+    createdAt: '2026-11-08T09:30:00Z',
+  },
+  {
+    id: 'INC1004',
+    title: 'Access request approval delayed',
+    category: 'ACCESS',
+    service: 'IAM',
+    priority: 'P4',
+    status: 'NEW',
+    reporter: 'Asha Employee',
+    technician: 'Ravi Technician',
+    createdAt: '2026-11-08T14:00:00Z',
+  },
+  {
+    id: 'INC1005',
+    title: 'CRM dashboard loads slowly',
+    category: 'APPLICATION',
+    service: 'CRM',
+    priority: 'P2',
+    status: 'RESOLVED',
+    reporter: 'Asha Employee',
+    technician: 'Ravi Technician',
+    createdAt: '2026-11-06T16:10:00Z',
+  },
 ]
 
 const publicUser = ({ id, name, role }) => ({ id, name, role })
@@ -29,7 +75,6 @@ export const handlers = [
     if (users.some((u) => u.email === email)) {
       return HttpResponse.json({ message: 'Email already registered' }, { status: 409 })
     }
-    // Role is forced to EMPLOYEE on the server side, whatever the client sends.
     const user = { id: users.length + 1, name, email, password, role: 'EMPLOYEE' }
     users.push(user)
     return HttpResponse.json({ token: 'fake-jwt-' + user.id, user: publicUser(user) }, { status: 201 })
@@ -49,13 +94,28 @@ export const handlers = [
   http.post('/api/incidents', async ({ request }) => {
     const body = await request.json()
     const created = {
-      id: 'INC' + (1001 + incidents.length),
+      id: 'INC' + (1000 + incidents.length + 1),
       status: 'NEW',
       priority: 'P3',
+      reporter: 'Asha Employee',
+      technician: 'Ravi Technician',
       createdAt: new Date().toISOString(),
       ...body,
     }
     incidents = [created, ...incidents]
     return HttpResponse.json(created, { status: 201 })
+  }),
+
+  http.patch('/api/incidents/:id/status', async ({ params, request }) => {
+    const { id } = params
+    const { status } = await request.json()
+    const match = incidents.find((incident) => incident.id === id)
+
+    if (!match) {
+      return HttpResponse.json({ message: 'Incident not found' }, { status: 404 })
+    }
+
+    match.status = status
+    return HttpResponse.json(match)
   }),
 ]
