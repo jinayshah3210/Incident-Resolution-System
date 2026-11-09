@@ -3,6 +3,7 @@ import { AuthProvider, useAuth } from './auth/AuthContext'
 import ProtectedRoute from './auth/ProtectedRoute'
 import Layout from './components/Layout'
 import Login from './pages/Login'
+import Register from './pages/Register'
 import EmployeeHome from './pages/employee/EmployeeHome'
 import TechnicianHome from './pages/technician/TechnicianHome'
 import AdminHome from './pages/admin/AdminHome'
@@ -19,6 +20,7 @@ export default function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
           <Route path="/" element={<HomeRedirect />} />
 
           <Route element={<ProtectedRoute allowedRoles={['EMPLOYEE']} />}>

@@ -9,12 +9,21 @@ export function AuthProvider({ children }) {
     return saved ? JSON.parse(saved) : null
   })
 
-  async function login(email, password) {
-    const { data } = await client.post('/api/auth/login', { email, password })
+  function saveSession(data) {
     localStorage.setItem('token', data.token)
     localStorage.setItem('user', JSON.stringify(data.user))
     setUser(data.user)
     return data.user
+  }
+
+  async function login(email, password) {
+    const { data } = await client.post('/api/auth/login', { email, password })
+    return saveSession(data)
+  }
+
+  async function register(name, email, password) {
+    const { data } = await client.post('/api/auth/register', { name, email, password })
+    return saveSession(data)
   }
 
   function logout() {
@@ -24,7 +33,7 @@ export function AuthProvider({ children }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider value={{ user, login, register, logout }}>
       {children}
     </AuthContext.Provider>
   )

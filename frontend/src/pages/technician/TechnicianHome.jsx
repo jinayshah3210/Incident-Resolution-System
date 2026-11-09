@@ -1,3 +1,5 @@
+import Card from '../../components/Card'
+
 export default function TechnicianHome() {
-  return <h2>Technician Home</h2>
+  return <Card title="Technician">Technician home (assigned incidents coming next)</Card>
 }

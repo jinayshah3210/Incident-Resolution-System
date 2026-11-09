@@ -1,3 +1,5 @@
+import Card from '../../components/Card'
+
 export default function AdminHome() {
-  return <h2>Admin Home</h2>
+  return <Card title="Admin">Admin dashboard (coming next)</Card>
 }

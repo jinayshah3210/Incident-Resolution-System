@@ -1,10 +1,11 @@
 import { http, HttpResponse } from 'msw'
 
-const users = {
-  'emp@test.com':   { id: 1, name: 'Asha Employee',   role: 'EMPLOYEE' },
-  'tech@test.com':  { id: 2, name: 'Ravi Technician', role: 'TECHNICIAN' },
-  'admin@test.com': { id: 3, name: 'Meera Admin',     role: 'ADMIN' },
-}
+// Mock "database". The real backend will store BCrypt hashes, never plain passwords.
+let users = [
+  { id: 1, name: 'Asha Employee',   email: 'emp@test.com',   password: 'Emp@1234',   role: 'EMPLOYEE' },
+  { id: 2, name: 'Ravi Technician', email: 'tech@test.com',  password: 'Tech@1234',  role: 'TECHNICIAN' },
+  { id: 3, name: 'Meera Admin',     email: 'admin@test.com', password: 'Admin@1234', role: 'ADMIN' },
+]
 
 let incidents = [
   { id: 'INC1001', title: 'Payment app unavailable', category: 'APPLICATION',
@@ -17,14 +18,30 @@ let incidents = [
     createdAt: '2026-11-07T11:20:00Z' },
 ]
 
+const publicUser = ({ id, name, role }) => ({ id, name, role })
+
 export const handlers = [
+  http.post('/api/auth/register', async ({ request }) => {
+    const { name, email, password } = await request.json()
+    if (!name || !email || !password || password.length < 8) {
+      return HttpResponse.json({ message: 'Invalid input' }, { status: 400 })
+    }
+    if (users.some((u) => u.email === email)) {
+      return HttpResponse.json({ message: 'Email already registered' }, { status: 409 })
+    }
+    // Role is forced to EMPLOYEE on the server side, whatever the client sends.
+    const user = { id: users.length + 1, name, email, password, role: 'EMPLOYEE' }
+    users.push(user)
+    return HttpResponse.json({ token: 'fake-jwt-' + user.id, user: publicUser(user) }, { status: 201 })
+  }),
+
   http.post('/api/auth/login', async ({ request }) => {
-    const { email } = await request.json()
-    const user = users[email]
+    const { email, password } = await request.json()
+    const user = users.find((u) => u.email === email && u.password === password)
     if (!user) {
       return HttpResponse.json({ message: 'Invalid credentials' }, { status: 401 })
     }
-    return HttpResponse.json({ token: 'fake-jwt-' + user.role, user })
+    return HttpResponse.json({ token: 'fake-jwt-' + user.id, user: publicUser(user) })
   }),
 
   http.get('/api/incidents', () => HttpResponse.json(incidents)),
