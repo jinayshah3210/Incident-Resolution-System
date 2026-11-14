@@ -12,7 +12,6 @@ const initialForm = {
   title: '',
   category: 'APPLICATION',
   service: 'Application',
-  priority: 'P3',
 }
 
 export default function EmployeeHome() {
@@ -116,20 +115,6 @@ export default function EmployeeHome() {
             />
           </div>
 
-          <div>
-            <label className="mb-2 block text-sm font-medium text-slate-700">Priority</label>
-            <select
-              value={form.priority}
-              onChange={(e) => setForm((current) => ({ ...current, priority: e.target.value }))}
-              className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-700 focus:border-indigo-300 focus:outline-none focus:ring-2 focus:ring-indigo-100"
-            >
-              <option value="P1">P1</option>
-              <option value="P2">P2</option>
-              <option value="P3">P3</option>
-              <option value="P4">P4</option>
-            </select>
-          </div>
-
           <div className="md:col-span-2">
             <label className="mb-2 block text-sm font-medium text-slate-700">Category</label>
             <select
@@ -144,6 +129,10 @@ export default function EmployeeHome() {
               <option value="INFRASTRUCTURE">Infrastructure</option>
             </select>
           </div>
+
+          <p className="text-sm text-slate-500 md:col-span-2">
+            An administrator will assign the incident priority.
+          </p>
 
           <div className="md:col-span-2 flex items-center justify-between gap-3">
             {message && <p className="text-sm text-slate-600">{message}</p>}

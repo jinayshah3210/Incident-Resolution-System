@@ -1,4 +1,4 @@
-export default function IncidentDetails({ incident, onClose, onStatusChange }) {
+export default function IncidentDetails({ incident, onClose, onStatusChange, onPriorityChange, priorityUpdating = false }) {
   if (!incident) return null
 
   return (
@@ -47,7 +47,24 @@ export default function IncidentDetails({ incident, onClose, onStatusChange }) {
           </div>
           <div>
             <div className="text-xs text-slate-500">Priority</div>
-            <div className="text-slate-800">{incident.priority}</div>
+            {onPriorityChange ? (
+              <select
+                value={incident.priority}
+                onChange={(e) => onPriorityChange(incident.id, e.target.value)}
+                disabled={priorityUpdating}
+                className="mt-1 w-full rounded border border-slate-300 px-2 py-1 text-sm"
+              >
+                <option value="P1">P1</option>
+                <option value="P2">P2</option>
+                <option value="P3">P3</option>
+                <option value="P4">P4</option>
+              </select>
+            ) : (
+              <div className="mt-1 text-slate-800">{incident.priority}</div>
+            )}
+            {onPriorityChange && priorityUpdating && (
+              <div className="mt-1 text-xs text-slate-500" role="status">Updating priority...</div>
+            )}
           </div>
 
           <div>

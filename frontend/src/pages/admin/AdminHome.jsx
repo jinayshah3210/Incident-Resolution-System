@@ -12,14 +12,16 @@ import Card from '../../components/Card'
 import IncidentTable from '../../components/IncidentTable'
 import IncidentDetails from '../../components/IncidentDetails'
 import MetricCard from '../../components/MetricCard'
+import client from '../../api/client'
 import useFetch from '../../api/useFetch'
 
 export default function AdminHome() {
-  const { data, loading, error } = useFetch('/api/incidents')
+  const { data, loading, error, reload } = useFetch('/api/incidents')
   const [query, setQuery] = useState('')
   const [status, setStatus] = useState('ALL')
   const [priority, setPriority] = useState('ALL')
   const [selectedIncident, setSelectedIncident] = useState(null)
+  const [updatingPriority, setUpdatingPriority] = useState(false)
 
   const filtered = useMemo(() => {
     return (data || []).filter((incident) => {
@@ -58,6 +60,19 @@ export default function AdminHome() {
     .map(([name, count]) => ({ name, count }))
     .sort((a, b) => b.count - a.count)
     .slice(0, 3)
+
+  async function handlePriorityChange(id, priority) {
+    try {
+      setUpdatingPriority(true)
+      await client.patch(`/api/incidents/${id}/priority`, { priority })
+      setSelectedIncident((current) => (current && current.id === id ? { ...current, priority } : current))
+      await reload()
+    } catch {
+      alert('Unable to update incident priority')
+    } finally {
+      setUpdatingPriority(false)
+    }
+  }
 
   return (
     <div className="space-y-6 pb-4">
@@ -153,7 +168,12 @@ export default function AdminHome() {
         )}
       </Card>
 
-      <IncidentDetails incident={selectedIncident} onClose={() => setSelectedIncident(null)} />
+      <IncidentDetails
+        incident={selectedIncident}
+        onClose={() => setSelectedIncident(null)}
+        onPriorityChange={handlePriorityChange}
+        priorityUpdating={updatingPriority}
+      />
     </div>
   )
 }

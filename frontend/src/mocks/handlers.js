@@ -96,11 +96,11 @@ export const handlers = [
     const created = {
       id: 'INC' + (1000 + incidents.length + 1),
       status: 'NEW',
-      priority: 'P3',
       reporter: 'Asha Employee',
       technician: 'Ravi Technician',
       createdAt: new Date().toISOString(),
       ...body,
+      priority: 'P3',
     }
     incidents = [created, ...incidents]
     return HttpResponse.json(created, { status: 201 })
@@ -116,6 +116,19 @@ export const handlers = [
     }
 
     match.status = status
+    return HttpResponse.json(match)
+  }),
+
+  http.patch('/api/incidents/:id/priority', async ({ params, request }) => {
+    const { id } = params
+    const { priority } = await request.json()
+    const match = incidents.find((incident) => incident.id === id)
+
+    if (!match) {
+      return HttpResponse.json({ message: 'Incident not found' }, { status: 404 })
+    }
+
+    match.priority = priority
     return HttpResponse.json(match)
   }),
 ]
