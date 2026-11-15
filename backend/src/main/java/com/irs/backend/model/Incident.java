@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 public class Incident {
 
     private Long id;
-
+    private LocalDateTime resolvedAt;
     private String title;
     private String description;
     private String category;
@@ -24,7 +24,7 @@ public class Incident {
     private LocalDateTime respondedAt;
 
     // Constructor
-    public Incident(String title, String description,String category) {
+    public Incident(String title, String description, String category) {
         LocalDateTime now = LocalDateTime.now();
         this.createdAt = now;
         this.updatedAt = now;
@@ -33,7 +33,7 @@ public class Incident {
         this.category = category;
 
         this.status = IncidentStatus.NEW;
-        
+
     }
 
     // Getters
@@ -116,5 +116,13 @@ public class Incident {
 
     public void setRespondedAt(LocalDateTime respondedAt) {
         this.respondedAt = respondedAt;
+    }
+
+    public LocalDateTime getResolvedAt() {
+        return resolvedAt;
+    }
+
+    public void setResolvedAt(LocalDateTime resolvedAt) {
+        this.resolvedAt = resolvedAt;
     }
 }
