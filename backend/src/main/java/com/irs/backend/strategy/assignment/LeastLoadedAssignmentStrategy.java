@@ -1,4 +1,7 @@
+
 package com.irs.backend.strategy.assignment;
+
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Comparator;
@@ -7,6 +10,7 @@ import com.irs.backend.model.Incident;
 import com.irs.backend.model.Technician;
 import com.irs.backend.exception.TechnicianUnavailableException;
 
+@Component
 public class LeastLoadedAssignmentStrategy implements TechnicianAssignmentStrategy {
 
     @Override

@@ -1,26 +1,34 @@
 
 package com.irs.backend.model;
 
+import jakarta.persistence.*;
 import java.util.List;
 import java.util.ArrayList;
 
+@Entity
+@Table(name = "technicians")
 public class Technician extends User {
 
     private String department;
-    private List<String> skills;
+
+    @ElementCollection
+    @CollectionTable(
+        name = "technician_skills",
+        joinColumns = @JoinColumn(name = "technician_id")
+    )
+    @Column(name = "skill")
+    private List<String> skills = new ArrayList<>();
+
     private boolean available;
     private int activeIncidentCount;
 
-    public Technician(
-            String name,
-            String email,
-            String passwordHash,
-            String department) {
+    protected Technician() {
+    }
 
+    public Technician(String name, String email,
+                      String passwordHash, String department) {
         super(name, email, passwordHash);
-
         this.department = department;
-        this.skills = new ArrayList<>();
         this.available = true;
         this.activeIncidentCount = 0;
     }
@@ -29,8 +37,6 @@ public class Technician extends User {
     public String getRole() {
         return "TECHNICIAN";
     }
-
-    // Getters and Setters
 
     public String getDepartment() {
         return department;

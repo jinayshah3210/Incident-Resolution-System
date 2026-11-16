@@ -1,10 +1,10 @@
 
 package com.irs.backend.strategy;
-
+import org.springframework.stereotype.Component;
 import com.irs.backend.model.enums.Priority;
 import com.irs.backend.model.enums.Impact;
 import com.irs.backend.model.enums.Urgency;
-
+@Component
 public class DefaultPriorityStrategy
         implements PriorityCalculationStrategy {
 

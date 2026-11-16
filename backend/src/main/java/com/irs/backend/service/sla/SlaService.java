@@ -1,8 +1,8 @@
 package com.irs.backend.service.sla;
-
+import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import com.irs.backend.model.Incident;
-
+@Service
 public class SlaService {
 
     private final SlaPolicy slaPolicy;

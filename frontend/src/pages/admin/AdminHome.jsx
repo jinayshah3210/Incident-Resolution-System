@@ -1,3 +1,4 @@
+
 import { useMemo, useState } from 'react'
 import {
   BarChart,
@@ -21,24 +22,38 @@ export default function AdminHome() {
   const [status, setStatus] = useState('ALL')
   const [priority, setPriority] = useState('ALL')
   const [selectedIncident, setSelectedIncident] = useState(null)
-  const [updatingPriority, setUpdatingPriority] = useState(false)
+  const [assigningId, setAssigningId] = useState(null)
 
   const filtered = useMemo(() => {
     return (data || []).filter((incident) => {
-      const matchesQuery = !query || `${incident.id} ${incident.title} ${incident.service} ${incident.reporter} ${incident.technician}`.toLowerCase().includes(query.toLowerCase())
+      const matchesQuery = !query ||
+        `${incident.id} ${incident.title} ${incident.service} ${incident.reporter} ${incident.technician}`
+          .toLowerCase()
+          .includes(query.toLowerCase())
+
       const matchesStatus = status === 'ALL' || incident.status === status
       const matchesPriority = priority === 'ALL' || incident.priority === priority
+
       return matchesQuery && matchesStatus && matchesPriority
     })
   }, [data, priority, query, status])
 
   const counts = useMemo(() => {
     const incidents = data || []
+
     return {
-      open: incidents.filter((incident) => !['RESOLVED', 'VERIFIED', 'CLOSED'].includes(incident.status)).length,
-      inProgress: incidents.filter((incident) => incident.status === 'IN_PROGRESS').length,
-      resolved: incidents.filter((incident) => incident.status === 'RESOLVED').length,
-      p1: incidents.filter((incident) => incident.priority === 'P1').length,
+      open: incidents.filter(
+        (incident) => !['RESOLVED', 'VERIFIED', 'CLOSED'].includes(incident.status)
+      ).length,
+      inProgress: incidents.filter(
+        (incident) => incident.status === 'IN_PROGRESS'
+      ).length,
+      resolved: incidents.filter(
+        (incident) => incident.status === 'RESOLVED'
+      ).length,
+      p1: incidents.filter(
+        (incident) => incident.priority === 'P1'
+      ).length,
       total: incidents.length,
       technicianLoad: incidents.reduce((acc, incident) => {
         const tech = incident.technician || 'Unassigned'
@@ -61,16 +76,22 @@ export default function AdminHome() {
     .sort((a, b) => b.count - a.count)
     .slice(0, 3)
 
-  async function handlePriorityChange(id, priority) {
+  async function handleAssign(id) {
     try {
-      setUpdatingPriority(true)
-      await client.patch(`/api/incidents/${id}/priority`, { priority })
-      setSelectedIncident((current) => (current && current.id === id ? { ...current, priority } : current))
+      setAssigningId(id)
+
+      await client.post(`/api/incidents/${id}/assign`)
+
       await reload()
-    } catch {
-      alert('Unable to update incident priority')
+
+      setSelectedIncident(null)
+    } catch (error) {
+      alert(
+        error.response?.data?.message ||
+        'Unable to assign incident. Check technician availability and skills.'
+      )
     } finally {
-      setUpdatingPriority(false)
+      setAssigningId(null)
     }
   }
 
@@ -110,12 +131,21 @@ export default function AdminHome() {
                 <div className="h-2 rounded-full bg-slate-200">
                   <div
                     className="h-2 rounded-full bg-indigo-500"
-                    style={{ width: `${Math.min((tech.count / Math.max(...topTechnicians.map((item) => item.count), 1)) * 100, 100)}%` }}
+                    style={{
+                      width: `${Math.min(
+                        (tech.count / Math.max(...topTechnicians.map((item) => item.count), 1)) * 100,
+                        100
+                      )}%`
+                    }}
                   />
                 </div>
               </div>
             ))}
-            {!topTechnicians.length && <p className="text-sm text-slate-500">No technician assignments yet.</p>}
+            {!topTechnicians.length && (
+              <p className="text-sm text-slate-500">
+                No technician assignments yet.
+              </p>
+            )}
           </div>
         </Card>
       </div>
@@ -128,6 +158,7 @@ export default function AdminHome() {
             placeholder="Search incidents"
             className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 lg:max-w-md"
           />
+
           <select
             value={status}
             onChange={(e) => setStatus(e.target.value)}
@@ -135,14 +166,16 @@ export default function AdminHome() {
           >
             <option value="ALL">All statuses</option>
             <option value="NEW">New</option>
-            <option value="CLASSIFIED">Classified</option>
             <option value="ASSIGNED">Assigned</option>
             <option value="ACKNOWLEDGED">Acknowledged</option>
             <option value="IN_PROGRESS">In progress</option>
+            <option value="ON_HOLD">On hold</option>
             <option value="RESOLVED">Resolved</option>
             <option value="VERIFIED">Verified</option>
             <option value="CLOSED">Closed</option>
+            <option value="REOPENED">Reopened</option>
           </select>
+
           <select
             value={priority}
             onChange={(e) => setPriority(e.target.value)}
@@ -156,14 +189,24 @@ export default function AdminHome() {
           </select>
         </div>
 
-        {loading && <p className="text-sm text-slate-500">Loading dashboard...</p>}
-        {error && <p className="text-sm text-red-600">Unable to load incident dashboard.</p>}
+        {loading && (
+          <p className="text-sm text-slate-500">Loading dashboard...</p>
+        )}
+
+        {error && (
+          <p className="text-sm text-red-600">
+            Unable to load incident dashboard.
+          </p>
+        )}
+
         {!loading && !error && (
           <IncidentTable
             items={filtered}
             emptyMessage="No incidents match your filters."
             onSelect={setSelectedIncident}
             showAssignee
+            onAssign={handleAssign}
+            assigningId={assigningId}
           />
         )}
       </Card>
@@ -171,8 +214,6 @@ export default function AdminHome() {
       <IncidentDetails
         incident={selectedIncident}
         onClose={() => setSelectedIncident(null)}
-        onPriorityChange={handlePriorityChange}
-        priorityUpdating={updatingPriority}
       />
     </div>
   )

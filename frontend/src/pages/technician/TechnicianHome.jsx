@@ -1,14 +1,13 @@
+
 import { useMemo, useState } from 'react'
 import Card from '../../components/Card'
 import IncidentTable from '../../components/IncidentTable'
 import IncidentDetails from '../../components/IncidentDetails'
 import MetricCard from '../../components/MetricCard'
-import { useAuth } from '../../auth/AuthContext'
 import client from '../../api/client'
 import useFetch from '../../api/useFetch'
 
 export default function TechnicianHome() {
-  const { user } = useAuth()
   const { data, loading, error, reload } = useFetch('/api/incidents')
   const [updating, setUpdating] = useState(false)
   const [query, setQuery] = useState('')
@@ -17,34 +16,56 @@ export default function TechnicianHome() {
   const [selectedIncident, setSelectedIncident] = useState(null)
 
   const incidents = useMemo(() => {
-    return (data || [])
-      .filter((incident) => incident.technician === user.name)
-      .filter((incident) => {
-        const matchesQuery = !query || `${incident.id} ${incident.title} ${incident.service}`.toLowerCase().includes(query.toLowerCase())
-        const matchesStatus = status === 'ALL' || incident.status === status
-        const matchesPriority = priority === 'ALL' || incident.priority === priority
-        return matchesQuery && matchesStatus && matchesPriority
-      })
-  }, [data, priority, query, status, user.name])
+    return (data || []).filter((incident) => {
+      const matchesQuery = !query ||
+        `${incident.id} ${incident.title} ${incident.service} ${incident.category}`
+          .toLowerCase()
+          .includes(query.toLowerCase())
+
+      const matchesStatus = status === 'ALL' || incident.status === status
+      const matchesPriority = priority === 'ALL' || incident.priority === priority
+
+      return matchesQuery && matchesStatus && matchesPriority
+    })
+  }, [data, priority, query, status])
 
   const stats = useMemo(() => {
-    const myIncidents = data ? data.filter((incident) => incident.technician === user.name) : []
+    const myIncidents = data || []
+
     return {
       assigned: myIncidents.length,
-      open: myIncidents.filter((incident) => !['RESOLVED', 'VERIFIED', 'CLOSED'].includes(incident.status)).length,
-      critical: myIncidents.filter((incident) => incident.priority === 'P1').length,
-      inProgress: myIncidents.filter((incident) => incident.status === 'IN_PROGRESS').length,
+      open: myIncidents.filter(
+        (incident) => !['RESOLVED', 'VERIFIED', 'CLOSED'].includes(incident.status)
+      ).length,
+      critical: myIncidents.filter(
+        (incident) => incident.priority === 'P1'
+      ).length,
+      inProgress: myIncidents.filter(
+        (incident) => incident.status === 'IN_PROGRESS'
+      ).length,
     }
-  }, [data, user.name])
+  }, [data])
 
-  async function handleStatusChange(id, status) {
+  async function handleStatusChange(id, newStatus) {
     try {
       setUpdating(true)
-      await client.patch(`/api/incidents/${id}/status`, { status })
-      setSelectedIncident((current) => (current && current.id === id ? { ...current, status } : current))
+
+      await client.patch(`/api/incidents/${id}/status`, {
+        status: newStatus,
+      })
+
+      setSelectedIncident((current) =>
+        current && current.id === id
+          ? { ...current, status: newStatus }
+          : current
+      )
+
       await reload()
-    } catch {
-      alert('Unable to update incident status')
+    } catch (error) {
+      alert(
+        error.response?.data?.message ||
+        'Unable to update incident status'
+      )
     } finally {
       setUpdating(false)
     }
@@ -67,6 +88,7 @@ export default function TechnicianHome() {
             placeholder="Search by ID, title or service"
             className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 lg:max-w-md"
           />
+
           <select
             value={status}
             onChange={(e) => setStatus(e.target.value)}
@@ -74,14 +96,16 @@ export default function TechnicianHome() {
           >
             <option value="ALL">All statuses</option>
             <option value="NEW">New</option>
-            <option value="CLASSIFIED">Classified</option>
             <option value="ASSIGNED">Assigned</option>
             <option value="ACKNOWLEDGED">Acknowledged</option>
             <option value="IN_PROGRESS">In progress</option>
+            <option value="ON_HOLD">On hold</option>
             <option value="RESOLVED">Resolved</option>
             <option value="VERIFIED">Verified</option>
             <option value="CLOSED">Closed</option>
+            <option value="REOPENED">Reopened</option>
           </select>
+
           <select
             value={priority}
             onChange={(e) => setPriority(e.target.value)}
@@ -95,9 +119,20 @@ export default function TechnicianHome() {
           </select>
         </div>
 
-        {updating && <p className="mb-3 text-xs text-indigo-600">Updating status...</p>}
-        {loading && <p className="text-sm text-slate-500">Loading assignments...</p>}
-        {error && <p className="text-sm text-red-600">Unable to retrieve assigned incidents.</p>}
+        {updating && (
+          <p className="mb-3 text-xs text-indigo-600">Updating status...</p>
+        )}
+
+        {loading && (
+          <p className="text-sm text-slate-500">Loading assignments...</p>
+        )}
+
+        {error && (
+          <p className="text-sm text-red-600">
+            Unable to retrieve assigned incidents.
+          </p>
+        )}
+
         {!loading && !error && (
           <IncidentTable
             items={incidents}

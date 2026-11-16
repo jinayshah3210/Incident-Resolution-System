@@ -1,8 +1,8 @@
 package com.irs.backend.service.sla;
-
+import org.springframework.stereotype.Component;
 import java.time.Duration;
 import com.irs.backend.model.enums.Priority;
-
+@Component
 public class SlaPolicy {
 
     public Duration getResponseTime(Priority priority) {

@@ -2,19 +2,34 @@
 package com.irs.backend.model;
 
 import com.irs.backend.model.enums.*;
+import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
+@Entity
+@Table(name = "incidents")
 public class Incident {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String title;
+
+    @Column(length = 5000)
     private String description;
+
     private String category;
 
+    @Enumerated(EnumType.STRING)
     private Impact impact;
+
+    @Enumerated(EnumType.STRING)
     private Urgency urgency;
+
+    @Enumerated(EnumType.STRING)
     private Priority priority;
+
+    @Enumerated(EnumType.STRING)
     private IncidentStatus status;
 
     private LocalDateTime createdAt;
@@ -23,97 +38,62 @@ public class Incident {
     private LocalDateTime resolutionDeadline;
     private LocalDateTime respondedAt;
 
-    // Constructor
-    public Incident(String title, String description,String category) {
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "reporter_id")
+    private User reporter;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "assigned_technician_id")
+    private Technician assignedTechnician;
+
+    protected Incident() {
+    }
+
+    public Incident(String title, String description, String category) {
         LocalDateTime now = LocalDateTime.now();
         this.createdAt = now;
         this.updatedAt = now;
         this.title = title;
         this.description = description;
         this.category = category;
-
         this.status = IncidentStatus.NEW;
-        
     }
 
-    // Getters
-    public Long getId() {
-        return id;
+    @PreUpdate
+    protected void onUpdate() {
+        this.updatedAt = LocalDateTime.now();
     }
 
-    public String getTitle() {
-        return title;
-    }
+    public Long getId() { return id; }
+    public String getTitle() { return title; }
+    public String getDescription() { return description; }
+    public String getCategory() { return category; }
+    public IncidentStatus getStatus() { return status; }
+    public Priority getPriority() { return priority; }
+    public Impact getImpact() { return impact; }
+    public Urgency getUrgency() { return urgency; }
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public LocalDateTime getUpdatedAt() { return updatedAt; }
+    public LocalDateTime getResponseDeadline() { return responseDeadline; }
+    public LocalDateTime getResolutionDeadline() { return resolutionDeadline; }
+    public LocalDateTime getRespondedAt() { return respondedAt; }
+    public User getReporter() { return reporter; }
+    public Technician getAssignedTechnician() { return assignedTechnician; }
 
-    public String getDescription() {
-        return description;
+    public void setImpact(Impact impact) { this.impact = impact; }
+    public void setUrgency(Urgency urgency) { this.urgency = urgency; }
+    public void setPriority(Priority priority) { this.priority = priority; }
+    public void setStatus(IncidentStatus status) { this.status = status; }
+    public void setReporter(User reporter) { this.reporter = reporter; }
+    public void setAssignedTechnician(Technician technician) {
+        this.assignedTechnician = technician;
     }
-
-    public IncidentStatus getStatus() {
-        return status;
+    public void setResponseDeadline(LocalDateTime deadline) {
+        this.responseDeadline = deadline;
     }
-
-    public Priority getPriority() {
-        return priority;
+    public void setResolutionDeadline(LocalDateTime deadline) {
+        this.resolutionDeadline = deadline;
     }
-
-    // Setters
-    public void setImpact(Impact impact) {
-        this.impact = impact;
-    }
-
-    public void setUrgency(Urgency urgency) {
-        this.urgency = urgency;
-    }
-
-    public void setPriority(Priority priority) {
-        this.priority = priority;
-    }
-
-    public void setStatus(IncidentStatus status) {
-        this.status = status;
-    }
-
-    public String getCategory() {
-        return category;
-    }
-
-    public Impact getImpact() {
-        return impact;
-    }
-
-    public Urgency getUrgency() {
-        return urgency;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public LocalDateTime getResponseDeadline() {
-        return responseDeadline;
-    }
-
-    public void setResponseDeadline(LocalDateTime responseDeadline) {
-        this.responseDeadline = responseDeadline;
-    }
-
-    public LocalDateTime getResolutionDeadline() {
-        return resolutionDeadline;
-    }
-
-    public void setResolutionDeadline(LocalDateTime resolutionDeadline) {
-        this.resolutionDeadline = resolutionDeadline;
-    }
-
-    public LocalDateTime getRespondedAt() {
-        return respondedAt;
-    }
-
     public void setRespondedAt(LocalDateTime respondedAt) {
         this.respondedAt = respondedAt;
     }
