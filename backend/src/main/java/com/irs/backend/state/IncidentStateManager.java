@@ -10,14 +10,14 @@ public class IncidentStateManager {
         IncidentStatus status = incident.getStatus();
 
         return switch (status) {
-            case NEW -> new NewState();
-            case ASSIGNED -> new AssignedState();
-            case IN_PROGRESS -> new InProgressState();
-            case ON_HOLD -> new OnHoldState();
-            case RESOLVED -> new ResolvedState();
-            case CLOSED -> new ClosedState();
-            case REOPENED -> new ReopenedState();
-        };
+    case NEW -> new NewState();
+    case ASSIGNED, ACKNOWLEDGED -> new AssignedState();
+    case IN_PROGRESS -> new InProgressState();
+    case ON_HOLD -> new OnHoldState();
+    case RESOLVED, VERIFIED -> new ResolvedState();
+    case CLOSED -> new ClosedState();
+    case REOPENED -> new ReopenedState();
+};
     }
 
     public void assign(Incident incident) {
