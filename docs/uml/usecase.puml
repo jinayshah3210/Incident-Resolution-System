@@ -1,0 +1,63 @@
+@startuml usecase
+!pragma layout smetana
+skinparam shadowing false
+skinparam monochrome true
+skinparam defaultFontName Arial
+left to right direction
+title ResolveIT - use case diagram
+actor Employee as E
+actor Technician as T
+actor Administrator as A
+actor "Scheduler\n(system)" as S
+rectangle "ResolveIT" {
+  usecase "Sign in" as UC0
+  usecase "Report incident" as UC1
+  usecase "Track incident status" as UC2
+  usecase "Chat / add information" as UC3
+  usecase "Approve or reject closure" as UC4
+  usecase "Give feedback" as UC5
+  usecase "Accept or decline assignment" as UC6
+  usecase "Investigate and add notes" as UC7
+  usecase "Request information" as UC8
+  usecase "Resolve incident" as UC9
+  usecase "View workload" as UC10
+  usecase "Manage employees and technicians" as UC11
+  usecase "Manage IT services and categories" as UC12
+  usecase "Configure SLA and strategies" as UC13
+  usecase "Monitor, edit and reassign incidents" as UC14
+  usecase "View reports and analytics" as UC15
+  usecase "View audit log" as UC16
+  usecase "Review SLA violations" as UC17
+  usecase "Classify and prioritise" as UCa
+  usecase "Assign technician" as UCb
+  usecase "Detect duplicates / related" as UCc
+  usecase "Monitor SLA and escalate" as UCd
+  usecase "Send notifications" as UCe
+}
+E --> UC0
+E --> UC1
+E --> UC2
+E --> UC3
+E --> UC4
+E --> UC5
+T --> UC0
+T --> UC6
+T --> UC7
+T --> UC8
+T --> UC9
+T --> UC4
+T --> UC10
+A --> UC0
+A --> UC11
+A --> UC12
+A --> UC13
+A --> UC14
+A --> UC15
+A --> UC16
+A --> UC17
+UC1 ..> UCa : <<include>>
+UC1 ..> UCb : <<include>>
+UC1 ..> UCc : <<include>>
+UCd <-- S
+UCe <-- S
+@enduml

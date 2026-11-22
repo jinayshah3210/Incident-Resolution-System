@@ -10,3 +10,4 @@ dist/
 backend/resolveiq-data*
 ResolveIT_Submission.zip
 .claude/
+docs/report/ResolveIT_Report.html
