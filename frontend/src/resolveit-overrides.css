@@ -1,0 +1,130 @@
+/* ResolveIT usability refinements built on the existing visual language. */
+.brand {letter-spacing:-.7px;white-space:nowrap}
+.brand>span {font-size:19px}
+.side-brand {display:flex;align-items:center;min-height:38px}
+.side-help {color:#e1e4ef;text-decoration:none;cursor:pointer}
+.side-help:hover, .side-help:focus-visible {background:#ffffff19;outline:2px solid #929ef8;outline-offset:1px}
+/* Keep product branding visible, and reserve a separate space for the toggle. */
+@media(min-width:761px) {
+  .sidebar {width:232px}
+  .sidebar .side-brand .brand>span {display:inline}
+  .sidebar .side-nav a span {display:inline}
+  .sidebar .side-help>div:nth-child(2) {display:flex;flex-direction:column;gap:3px}
+  .sidebar .side-user .user-lines,.sidebar .side-logout span {display:block}
+  .sidebar .side-brand {margin-right:43px;overflow:visible}
+  .sidebar .side-toggle {right:13px;top:26px;padding:3px;width:28px;height:28px}
+  .sidebar .side-label {margin-top:6px}
+  .main-area {margin-left:232px}
+  .sidebar.expanded {width:76px}
+  .sidebar.expanded .side-brand .brand>span {display:none}
+  .sidebar.expanded .side-nav a span {display:none}
+  .sidebar.expanded .side-help>div:nth-child(2),.sidebar.expanded .side-user .user-lines,.sidebar.expanded .side-logout span {display:none}
+  .sidebar.expanded .side-toggle {top:72px;right:25px}
+  .sidebar.expanded .side-brand {margin-bottom:44px}
+  .app-shell.nav-open .main-area {margin-left:76px}
+}
+/* Raise the legacy 8–10px text to readable sizes without crowding content. */
+.page-content,.panel,.sidebar {line-height:1.5}
+.page-title-row h1 {font-size:28px}
+.panel-heading h3,.config-card h3 {font-size:16px}
+.section-heading h2 {font-size:19px}
+.eyebrow,.side-label,.criticality {font-size:10px}
+.panel-heading p,.config-card>p,.service-card p,.incident-main small,.audit-item p,.audit-item small,.audit-item time,
+.person-info p,.person-info small,.config-explain,.service-bottom,.notification-item p,.notification-item small,
+.detail-actions p,.detail-foot,.empty-state p,.save-row,.support-card p {font-size:12px}
+.incident-main b,.audit-item b,.service-card h3,.notification-item b,.config-card label,.side-nav a,.side-help b,
+.incident-id b,.status-chip,.priority,.detail-grid small,.detail-grid p,.service-action-row .btn {font-size:12px}
+.sidebar .side-nav a {font-size:12px}
+.btn,.detail-actions .btn,.work-actions .btn,.save-row .btn,.page-title-row>.btn {font-size:12px;min-height:36px}
+input,select,textarea,.inline-note input,.config-card select {font-size:13px}
+.side-help small {font-size:11px}
+.side-help b {font-size:12px}
+.side-user b,.side-user small {font-size:11px}
+.config-card label {font-size:12px}
+.service-card h3 {font-size:15px}
+.auth-form .demo-hint {line-height:1.65}
+/* SLA edit grid */
+.sla-editor {margin-top:16px}
+.sla-editor-header,.sla-editor-row {display:grid;grid-template-columns:minmax(78px,.6fr) 1fr 1fr;align-items:center;gap:14px;padding:12px 6px}
+.sla-editor-header {font-size:12px;font-weight:700;color:#747c95;border-bottom:1px solid #edf0f6}
+.sla-editor-row {border-bottom:1px solid #f0f2f8}
+.sla-editor-row input {width:100%;max-width:230px;min-width:0;border:1px solid #dce1ef;border-radius:8px;padding:10px 12px;background:#fff;color:#303854}
+.sla-editor-row input:focus,.service-form :is(input,select,textarea):focus,.service-link select:focus {outline:2px solid #95a0eb;outline-offset:1px}
+/* Real service CRUD + associated technician panel */
+.service-clickable {text-align:left;cursor:pointer;min-height:175px;color:inherit;font:inherit;transition:border-color .15s,box-shadow .15s}
+.service-clickable:hover,.service-clickable.selected {border-color:#8490e8;box-shadow:0 5px 20px #4656b017}
+.service-card p {min-height:0;margin-top:8px}
+.service-card p+p {color:#646b86;font-weight:600}
+.service-bottom .inactive-dot {background:#b3b9cb}
+.service-detail {margin-top:17px}
+.service-detail h4 {font-size:15px;margin:18px 0 10px;color:#3e4764}
+.service-description {font-size:13px;color:#5f667f;margin:10px 0}
+.service-form {display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:end}
+.service-form label,.service-link label {display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:700;color:#525b75}
+.service-form label:nth-child(2) {grid-column:1 / -1}
+.service-form input,.service-form select,.service-form textarea,.service-link select,.people-form input {
+  width:100%;border:1px solid #dfe3ef;background:#fff;border-radius:9px;padding:10px 12px;color:#373d59;font-size:13px;min-width:0}
+.service-form .inline-check {flex-direction:row;align-items:center}
+.service-action-row {display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:12px 0 18px}
+.service-form .service-action-row {grid-column:1 / -1}
+.tech-associations {border:1px solid #e9ecf4;border-radius:11px;overflow:hidden}
+.tech-association {padding:12px;display:flex;gap:16px;align-items:center;justify-content:space-between;border-bottom:1px solid #eceef5}
+.tech-association:last-child {border-bottom:0}
+.tech-association>div {min-width:0;display:flex;flex-direction:column;gap:3px}
+.tech-association b {font-size:13px;color:#414964}
+.tech-association small {font-size:12px;color:#6c738c;overflow-wrap:anywhere}
+.service-link {margin-top:16px;display:flex;gap:12px;align-items:end}
+.service-link label {flex:1}
+/* Reversible user management */
+.people-form {padding:20px;margin-bottom:18px}
+.people-form h3 {font-size:15px;margin-bottom:12px}
+.people-form-grid {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-bottom:12px}
+.people-list {display:flex;flex-direction:column}
+.person-row {display:flex;align-items:center;gap:12px;padding:13px 2px;border-top:1px solid #edf0f5}
+.person-info {min-width:0;flex:1}
+.person-info b {font-size:13px;color:#454d65}
+.person-info p,.person-info small {margin:3px 0 0;display:block;overflow-wrap:anywhere}
+.account-action {height:36px;min-width:118px;padding:8px 10px;flex:none;font-size:12px!important}
+.account-status {padding:4px 9px;border-radius:99px;font-size:11px;font-weight:700}
+.account-status.active {color:#168a6f;background:#e4f7ed}
+.account-status.inactive {color:#99734d;background:#fff2e7}
+.inline-check {display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;color:#545c78;white-space:nowrap}
+.inline-check input {width:16px;height:16px}
+/* Incident-filtered audit trail */
+.audit-group {border:1px solid #eaecf4;border-radius:10px;margin:8px 0;overflow:hidden}
+.audit-group-title {width:100%;display:flex;justify-content:space-between;align-items:center;gap:16px;padding:14px 16px;cursor:pointer;border:0;background:#fafbfe;color:#444b66;text-align:left}
+.audit-group-title>span {display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.audit-group-title b {font-size:13px}
+.audit-group-title small {font-size:11px;color:#8c92a5}
+.chevron-open {transform:rotate(180deg)}
+.audit-group-body {padding:8px 14px}
+.audit-group-body>p {font-size:12px;color:#8c92a5}
+.pager {display:flex;justify-content:center;align-items:center;gap:16px;margin-top:16px;font-size:12px;color:#717993}
+/* Helpdesk details */
+.support-grid {display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.support-card {padding:24px}
+.support-card h3 {font-size:17px;margin:12px 0;color:#3f4764}
+.support-contact {display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;padding:12px 0;border-top:1px solid #eff1f5;font-size:13px}
+.support-contact b {min-width:86px}
+.support-contact a {color:#545fc9;overflow-wrap:anywhere}
+/* Keep navigation and forms legible on narrow screens. */
+@media(max-width:760px) {
+  .sidebar {width:0}
+  .sidebar.expanded {width:min(260px,87vw);box-shadow:12px 0 30px #15192c55}
+  .main-area,.app-shell.nav-open .main-area {margin-left:0}
+  .sidebar.expanded .side-brand .brand>span {display:inline}
+  .mobile-title {justify-content:flex-start}
+  .mobile-title .brand {margin-left:4px}
+  .mobile-title .brand>span {font-size:18px}
+  .mobile-title .icon-btn {flex:none}
+  .service-form,.support-grid,.people-form-grid {grid-template-columns:1fr}
+  .service-form label:nth-child(2) {grid-column:auto}
+  .person-row {flex-wrap:wrap}
+  .person-info {flex-basis:calc(100% - 60px)}
+  .tech-association {align-items:start;flex-direction:column}
+  .service-link {align-items:stretch;flex-direction:column}
+  .sla-editor-header,.sla-editor-row {gap:6px}
+  .page-title-row h1 {font-size:24px}
+}
+
+.audit-transition {font-weight:700;color:#545fc4!important}
