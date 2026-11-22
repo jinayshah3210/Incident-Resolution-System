@@ -1,0 +1,22 @@
+# Automated tests only: in-memory H2 in PostgreSQL mode. Flyway runs the same
+# migrations as production and Hibernate validates the entity mapping against them.
+spring:
+  datasource:
+    url: jdbc:h2:mem:resolveit-test;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH;DB_CLOSE_DELAY=-1
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+  flyway:
+    enabled: true
+resolveit:
+  demo-mode: true
+  demo-incidents: false
+  scheduling:
+    enabled: false
+logging:
+  level:
+    root: WARN
+    com.resolveit: WARN
