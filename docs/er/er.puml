@@ -1,0 +1,108 @@
+@startuml er
+' ResolveIT PostgreSQL schema (Flyway V1__schema.sql). Render: java -jar plantuml.jar er.puml
+!pragma layout smetana
+hide circle
+skinparam linetype ortho
+skinparam shadowing false
+title ResolveIT - entity relationship diagram
+
+entity users {
+  * id : varchar(20) <<PK>>
+  --
+  * role : varchar(20)  <<discriminator>>
+  * name, email <<UQ>>, password_hash
+  department, phone
+  * active, failed_login_attempts
+  locked_until, created_at
+}
+entity employees {
+  * user_id <<PK,FK>>\n--\njoin_date
+}
+entity technicians {
+  * user_id <<PK,FK>>\n--\n* max_workload\n* experience_years\n* team_lead
+}
+entity technician_skills {
+  * technician_id <<FK>>\n* skill
+}
+entity administrators {
+  * user_id <<PK,FK>>\n--\n* admin_level
+}
+entity categories {
+  * id <<PK>>\n--\n* name <<UQ>>\ndescription\n* active
+}
+entity category_keywords {
+  * category_id <<FK>>\n* keyword\n* weight
+}
+entity services {
+  * id <<PK>>\n--\n* name <<UQ>>\n* category\n* criticality (1-4)\nkeywords\n* active
+}
+entity service_technicians {
+  * id <<PK>>\n--\n* service_id <<FK>>\n* technician_id <<FK>>
+}
+entity incidents {
+  * id <<PK>>
+  --
+  * public_id <<UQ>>, sequence_number <<UQ>>
+  * title, description
+  * reporter_id <<FK>>
+  technician_id <<FK>>
+  category, service_name
+  impact, urgency, criticality, affected_users
+  priority, priority_score, priority_strategy
+  * status (8 states)
+  created_at ... closed_at
+  response_due_at, resolution_due_at
+  response_sla, resolution_sla, sla_status
+  escalation_level
+  resolution_summary, root_cause, resolution_steps
+  technician_approved, employee_approved
+  correlation_group, duplicate_of
+  * version
+}
+entity incident_declines {
+  * incident_id <<FK>>\n* technician_id
+}
+entity incident_notes {
+  * id <<PK>>\n--\n* incident_id <<FK>>\nauthor_id, note_type\ncontent, created_at
+}
+entity chat_messages {
+  * id <<PK>>\n--\n* incident_id <<FK>>\nsender_id, content, sent_at
+}
+entity feedback {
+  * id <<PK>>\n--\n* incident_id <<FK,UQ>>\nemployee_id\n* rating (1-5)\ncomment
+}
+entity sla_violations {
+  * id <<PK>>\n--\n* incident_id <<FK>>\n* violation_type\ndue_at, detected_at\ndelay_minutes, dismissed
+}
+entity escalations {
+  * id <<PK>>\n--\n* incident_id <<FK>>\n* level\ntarget_role, target_user
+}
+entity audit_events {
+  * id <<PK>>\n--\noccurred_at, actor\nincident_id (public id)\naction, detail\nprevious_status, new_status
+}
+entity notifications {
+  * id <<PK>>\n--\nuser_id, incident_id\nnotification_type, title\nmessage, is_read
+}
+entity email_outbox {
+  * id <<PK>>\n--\nrecipient_email, subject\nbody, status
+}
+entity settings {
+  * setting_key <<PK>>\n--\n* setting_value
+}
+
+users ||--o| employees
+users ||--o| technicians
+users ||--o| administrators
+technicians ||--o{ technician_skills
+categories ||--o{ category_keywords
+services ||--o{ service_technicians
+users ||--o{ service_technicians
+users ||--o{ incidents : reports
+users |o--o{ incidents : assigned
+incidents ||--o{ incident_declines
+incidents ||--o{ incident_notes
+incidents ||--o{ chat_messages
+incidents ||--o| feedback
+incidents ||--o{ sla_violations
+incidents ||--o{ escalations
+@enduml

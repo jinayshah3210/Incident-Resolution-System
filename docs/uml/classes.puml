@@ -1,0 +1,164 @@
+@startuml classes
+' ResolveIT domain model (package com.resolveit.domain). Render: java -jar plantuml.jar classes.puml
+!pragma layout smetana
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+title ResolveIT - domain model
+
+package "domain.user" {
+  enum Role {
+    EMPLOYEE\nTECHNICIAN\nADMIN\n+getDashboardPath(): String
+  }
+  enum AdminLevel {
+    ADMINISTRATOR\nIT_MANAGER
+  }
+  abstract class PortalUser <<Entity, JOINED>> {
+    - id: String
+    - name: String
+    - email: String
+    - passwordHash: String
+    - active: boolean
+    - failedLoginAttempts: int
+    - lockedUntil: Instant
+    + {abstract} getRole(): Role
+    + {abstract} canView(Incident): boolean
+    + verifyPassword(raw, now): boolean
+    + recordFailedLogin(now): void
+    + isLocked(now): boolean
+    + deactivate() / activate()
+  }
+  class Employee {
+    - joinDate: LocalDate
+  }
+  class Technician {
+    - skills: Set<String>
+    - maxWorkload: int
+    - experienceYears: int
+    - teamLead: boolean
+    + canHandle(category): boolean
+    + hasCapacity(load): boolean
+  }
+  class Administrator {
+    - adminLevel: AdminLevel\n+ isItManager(): boolean
+  }
+  PortalUser <|-- Employee
+  PortalUser <|-- Technician
+  PortalUser <|-- Administrator
+  PortalUser ..> Role
+  Administrator --> AdminLevel
+}
+
+package "domain.incident" {
+  enum IncidentStatus {
+    NEW\nCLASSIFIED\nASSIGNED\nACKNOWLEDGED\nIN_PROGRESS\nRESOLVED\nVERIFIED\nCLOSED
+  }
+  enum Priority {
+    P1\nP2\nP3\nP4\n+higher(): Priority
+  }
+  class Incident <<Aggregate root>> {
+    - publicId: String
+    - title / description
+    - reporterId / technicianId
+    - category / serviceName
+    - impact, urgency, criticality, affectedUsers: int
+    - priority: Priority
+    - priorityScore: int
+    - status: IncidentStatus
+    - responseDueAt / resolutionDueAt: Instant
+    - responseSla / resolutionSla: SlaClockState
+    - slaStatus: SlaStatus
+    - escalationLevel: int
+    - correlationGroup: String
+    + classify(...)
+    + offerTo(Technician, at)
+    + acknowledge(at)
+    + decline(at) / release(at)
+    + startWork(at)
+    + resolve(summary, root, steps, at)
+    + approveClosure(technicianSide, at): boolean
+    + rejectClosure(at)
+    + transitionTo(IncidentStatus, at)
+    + applyPriority(...) / applySlaDeadlines(...)
+    + markApproaching(type) / markViolated(type): boolean
+    + addNote(...) / addChatMessage(...) / leaveFeedback(...)
+    - state(): IncidentState
+  }
+  class IncidentNote {
+    - type: NoteType\n- content: String\n- createdAt: Instant
+  }
+  class ChatMessage {
+    - senderId: String\n- content: String\n- sentAt: Instant
+  }
+  class Feedback {
+    - rating: int\n- comment: String
+  }
+  Incident *-- "0..*" IncidentNote
+  Incident *-- "0..*" ChatMessage
+  Incident *-- "0..1" Feedback
+  Incident --> IncidentStatus
+  Incident --> Priority
+}
+
+package "domain.incident.state  <<State pattern>>" {
+  interface IncidentState {
+    + status(): IncidentStatus
+    + classify() / offer() / acknowledge() / release()
+    + start() / resolve() / verify() / reopen() / close()
+    + acceptsClosureReview(): boolean
+    + allowsConversation(): boolean
+  }
+  class NewState
+  class ClassifiedState
+  class AssignedState
+  class AcknowledgedState
+  class InProgressState
+  class ResolvedState
+  class VerifiedState
+  class ClosedState
+  IncidentState <|.. NewState
+  IncidentState <|.. ClassifiedState
+  IncidentState <|.. AssignedState
+  IncidentState <|.. AcknowledgedState
+  IncidentState <|.. InProgressState
+  IncidentState <|.. ResolvedState
+  IncidentState <|.. VerifiedState
+  IncidentState <|.. ClosedState
+}
+class IncidentStateFactory <<Factory>> {
+  - STATES: EnumMap\n+ forStatus(status): IncidentState
+}
+Incident ..> IncidentStateFactory
+IncidentStateFactory ..> IncidentState
+
+package "domain.catalog / sla / audit / notification" {
+  class ItService {
+    - name\n- category\n- criticality: int\n- keywords
+  }
+  class Category {
+    - name\n- active\n+ replaceKeywords(map)
+  }
+  class CategoryKeyword <<Embeddable>> {
+    - keyword\n- weight
+  }
+  class ServiceTechnician
+  class SlaViolation {
+    - type: ViolationType\n- dueAt / detectedAt\n- delayMinutes\n+ dismiss(admin)
+  }
+  class Escalation {
+    - level: int\n- targetRole
+  }
+  class AuditEvent <<Immutable>> {
+    - occurredAt\n- actor\n- action\n- previousStatus / newStatus
+  }
+  class Notification {
+    - userId\n- type\n- read: boolean\n+ markRead()
+  }
+  Category *-- "0..*" CategoryKeyword
+  ServiceTechnician --> ItService
+  SlaViolation --> Incident
+  Escalation --> Incident
+}
+Technician "0..*" -- "0..*" ItService : qualified for >
+Incident --> "1" Employee : reporter
+Incident --> "0..1" Technician : assignee
+@enduml

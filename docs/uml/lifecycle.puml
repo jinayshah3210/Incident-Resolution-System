@@ -1,0 +1,15 @@
+@startuml
+[*] --> NEW
+NEW --> CLASSIFIED : classify
+CLASSIFIED --> ASSIGNED : offer technician
+ASSIGNED --> ACKNOWLEDGED : accept
+ASSIGNED --> CLASSIFIED : reject / timeout
+ACKNOWLEDGED --> IN_PROGRESS : start
+ACKNOWLEDGED --> CLASSIFIED : unassign
+IN_PROGRESS --> RESOLVED : resolve
+IN_PROGRESS --> CLASSIFIED : unassign
+RESOLVED --> VERIFIED : both approve
+RESOLVED --> IN_PROGRESS : reject closure
+VERIFIED --> CLOSED : close
+CLOSED --> [*]
+@enduml

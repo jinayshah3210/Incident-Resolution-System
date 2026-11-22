@@ -1,0 +1,35 @@
+@startuml architecture
+' ResolveIT layered architecture. Render: java -jar plantuml.jar architecture.puml
+!pragma layout smetana
+skinparam shadowing false
+title ResolveIT - layered architecture
+node "Browser" {
+  [React SPA (Vite)\napi / context / hooks / components / layouts / pages] as SPA
+}
+node "Spring Boot API (com.resolveit)" {
+  [web.controller\n(thin REST, DTO records)] as C
+  [security\nJWT + @CurrentUser] as S
+  [exception\nGlobalExceptionHandler -> ApiError] as E
+  [service\nWorkflow, Query, Assignment, Sla, Auth, User,\nCatalog, Settings, Notification, Audit, Report, Chat,\nSimilarity, Correlation] as SV
+  [domain\nentities + State objects] as D
+  [strategy\npriority / assignment / classify] as ST
+  [event + observer\npublisher, Audit/Notification/Sla observers] as O
+  [escalation\nchain of responsibility] as ES
+  [notify\nInApp + Email (Adapter)] as N
+  [scheduler\nSlaMonitorJob, AssignmentRetryJob] as J
+  [repository\nSpring Data JPA + Specifications] as R
+}
+database "PostgreSQL\n(Flyway V1 schema, V2 reference data)" as DB
+SPA --> C : REST / JSON + Bearer JWT
+C --> S
+C --> SV
+C ..> E
+SV --> D
+SV --> ST
+SV --> O
+SV --> ES
+O --> N
+J --> SV
+SV --> R
+R --> DB
+@enduml

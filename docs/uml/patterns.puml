@@ -1,0 +1,128 @@
+@startuml patterns
+' ResolveIT behavioural and creational patterns. Render: java -jar plantuml.jar patterns.puml
+!pragma layout smetana
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+title ResolveIT - Strategy, Observer, Factory, Adapter, Chain of Responsibility
+
+package "Strategy" {
+  interface NamedStrategy {
+    + key(): String\n+ displayName(): String
+  }
+  class "StrategyRegistry<T extends NamedStrategy>" as Registry {
+    - strategies: Map<String,T>\n+ get(key): T
+  }
+  interface PriorityStrategy {
+    + compute(PriorityInput): PriorityResult
+  }
+  class MultiplicativePriorityStrategy
+  class WeightedPriorityStrategy
+  interface AssignmentStrategy {
+    + select(Incident, List<TechnicianCandidate>): Optional
+  }
+  class LeastLoadStrategy
+  class RoundRobinStrategy {
+    - cursors: ConcurrentHashMap
+  }
+  class SkillExperienceStrategy
+  interface CategoryClassifier {
+    + classify(title, description, categories): ClassificationResult
+  }
+  class KeywordCategoryClassifier
+  abstract class KeywordScaleAnalyzer {
+    # {abstract} defineRules(): Map\n+ analyze(text): int
+  }
+  NamedStrategy <|-- PriorityStrategy
+  NamedStrategy <|-- AssignmentStrategy
+  NamedStrategy <|-- CategoryClassifier
+  PriorityStrategy <|.. MultiplicativePriorityStrategy
+  PriorityStrategy <|.. WeightedPriorityStrategy
+  AssignmentStrategy <|.. LeastLoadStrategy
+  AssignmentStrategy <|.. RoundRobinStrategy
+  AssignmentStrategy <|.. SkillExperienceStrategy
+  CategoryClassifier <|.. KeywordCategoryClassifier
+  KeywordScaleAnalyzer <|-- ImpactAnalyzer
+  KeywordScaleAnalyzer <|-- UrgencyAnalyzer
+  KeywordScaleAnalyzer <|-- AffectedUsersAnalyzer
+  Registry o-- NamedStrategy
+}
+
+package "Observer" {
+  class IncidentEvent <<record>> {
+    type, incident, actorId, detail, previousStatus, occurredAt, attributes
+  }
+  class IncidentEventPublisher {
+    - observers: List<IncidentObserver>\n+ publish(IncidentEvent)
+  }
+  interface IncidentObserver {
+    + onEvent(IncidentEvent)\n+ order(): int
+  }
+  class SlaObserver
+  class AuditObserver
+  class NotificationObserver
+  IncidentEventPublisher o-- "1..*" IncidentObserver
+  IncidentObserver <|.. SlaObserver
+  IncidentObserver <|.. AuditObserver
+  IncidentObserver <|.. NotificationObserver
+  IncidentEventPublisher ..> IncidentEvent
+}
+
+package "Notification delivery (Strategy + Adapter)" {
+  interface NotificationChannel {
+    + name()\n+ isEnabled()\n+ deliver(Notification, PortalUser)
+  }
+  class InAppChannel
+  class EmailChannel <<Adapter>>
+  interface MailGateway {
+    + send(to, subject, body)
+  }
+  class LoggingMailGateway
+  class NotificationService {
+    + send(Notification)
+  }
+  NotificationChannel <|.. InAppChannel
+  NotificationChannel <|.. EmailChannel
+  EmailChannel --> MailGateway
+  MailGateway <|.. LoggingMailGateway
+  NotificationService o-- "1..*" NotificationChannel
+}
+
+package "Factory" {
+  class IncidentFactory {
+    + create(reporter, title, description, affected, at): Incident
+  }
+  class NotificationFactory {
+    + forEvent(IncidentEvent): List<Notification>
+  }
+  class UserFactory {
+    - creators: EnumMap<Role, Function>\n+ create(Role, NewUserSpec): PortalUser
+  }
+}
+NotificationObserver --> NotificationFactory
+NotificationObserver --> NotificationService
+
+package "Chain of Responsibility" {
+  abstract class EscalationHandler {
+    - next: EscalationHandler\n+ linkWith(next): EscalationHandler\n+ handle(EscalationRequest)\n+ {abstract} level(): int
+  }
+  class TechnicianReminderHandler
+  class TeamLeadHandler
+  class AdminHandler
+  class ItManagerHandler
+  class EscalationService {
+    - chain: EscalationHandler\n+ evaluate(Incident, now)
+  }
+  EscalationHandler <|-- TechnicianReminderHandler
+  EscalationHandler <|-- TeamLeadHandler
+  EscalationHandler <|-- AdminHandler
+  EscalationHandler <|-- ItManagerHandler
+  EscalationHandler --> "0..1" EscalationHandler : next
+  EscalationService --> EscalationHandler
+}
+
+class IncidentWorkflowService <<Facade of the pipeline>>
+IncidentWorkflowService --> Registry
+IncidentWorkflowService --> IncidentFactory
+IncidentWorkflowService --> IncidentEventPublisher
+IncidentWorkflowService --> KeywordScaleAnalyzer
+@enduml
