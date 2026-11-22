@@ -1,0 +1,18 @@
+# Optional: PostgreSQL in Docker. If PostgreSQL is installed locally (port 5432), skip this and create the
+# database once with:  CREATE ROLE resolveit LOGIN PASSWORD '<password>'; CREATE DATABASE resolveit OWNER resolveit;
+services:
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: ${DB_NAME:-resolveit}
+      POSTGRES_USER: ${DB_USER:-resolveit}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-resolveit-local}
+    ports: ["5432:5432"]
+    volumes: ["resolveit_data:/var/lib/postgresql/data"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-resolveit} -d ${DB_NAME:-resolveit}"]
+      interval: 5s
+      timeout: 3s
+      retries: 15
+volumes:
+  resolveit_data:

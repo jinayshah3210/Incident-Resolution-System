@@ -1,0 +1,12 @@
+target/
+backend/resolveiq-data*
+backend/data/
+node_modules/
+dist/
+.env
+*.log
+.idea/
+.vscode/
+backend/resolveiq-data*
+ResolveIT_Submission.zip
+.claude/
