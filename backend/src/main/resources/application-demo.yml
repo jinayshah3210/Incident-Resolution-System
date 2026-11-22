@@ -1,0 +1,8 @@
+# Presentation profile: one real second counts as one SLA minute so breaches and
+# escalations can be shown on camera within seconds.
+resolveit:
+  sla:
+    time-scale: 60
+    monitor-ms: 5000
+  assignment:
+    retry-ms: 10000

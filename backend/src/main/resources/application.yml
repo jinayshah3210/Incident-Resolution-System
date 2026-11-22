@@ -1,0 +1,45 @@
+# ResolveIT runtime configuration. PostgreSQL is the only supported runtime database.
+# Defaults match docker-compose.yml; override with DB_HOST, DB_PORT, DB_NAME, DB_USER, DB_PASSWORD.
+server:
+  port: ${SERVER_PORT:8080}
+spring:
+  application:
+    name: ResolveIT
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:resolveit}
+    username: ${DB_USER:resolveit}
+    password: ${DB_PASSWORD:resolveit-local}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+  jackson:
+    default-property-inclusion: non_null
+resolveit:
+  demo-mode: ${DEMO_MODE:true}
+  demo-incidents: ${DEMO_INCIDENTS:true}
+  scheduling:
+    enabled: ${SCHEDULING_ENABLED:true}
+  support:
+    email: ${SUPPORT_EMAIL:support@resolveit.test}
+    phone: ${SUPPORT_PHONE:}
+  jwt-secret: ${JWT_SECRET:local-demo-signing-secret-change-in-env-please}
+  cors-origins: ${CORS_ORIGINS:http://localhost:5173,http://127.0.0.1:5173}
+  sla:
+    time-scale: ${SLA_TIME_SCALE:1}
+    monitor-ms: ${SLA_MONITOR_MS:30000}
+  assignment:
+    retry-ms: ${ASSIGNMENT_RETRY_MS:60000}
+  mail:
+    enabled: ${MAIL_ENABLED:false}
+logging:
+  level:
+    com.resolveit: INFO
